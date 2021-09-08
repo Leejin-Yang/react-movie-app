@@ -8,15 +8,29 @@ import GridCards from "../commons/GridCards";
 function LandingPage() {
   const [Movies, setMovies] = useState([]);
   const [MainMovieImage, setMainMovieImage] = useState(null);
+  const [CurrentPage, setCurrentPage] = useState(0);
+
+  const fetchMovies = (endpoint) => {
+    axios.get(endpoint).then((response) => {
+      setMovies([...Movies, ...response.data.results]);
+      setMainMovieImage(MainMovieImage || response.data.results[0]);
+      setCurrentPage(response.data.page);
+    });
+  };
 
   useEffect(() => {
     const endpoint = `${API_URL}movie/popular?api_key=${API_KEY}&language=en-US&page=1`;
 
-    axios.get(endpoint).then((response) => {
-      setMovies(response.data.results);
-      setMainMovieImage(response.data.results[0]);
-    });
+    fetchMovies(endpoint);
   }, []);
+
+  const loadMoreItems = () => {
+    const endpoint = `${API_URL}movie/popular?api_key=${API_KEY}&language=en-US&page=${
+      CurrentPage + 1
+    }`;
+
+    fetchMovies(endpoint);
+  };
 
   return (
     <div style={{ width: "100%", margin: "0" }}>
@@ -53,7 +67,7 @@ function LandingPage() {
       </div>
 
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <button>Load More</button>
+        <button onClick={loadMoreItems}>Load More</button>
       </div>
     </div>
   );
